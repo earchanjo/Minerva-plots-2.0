@@ -153,7 +153,7 @@ void MainWindow::on_btn_add_clicked()
         else {
             qDebug() << "Falha ao abrir conexão serial.";
         }
-    Read_Serial();
+    
     /*Ira analisar qual opcao foi escolhida no combo menu, para colocar na funcao de plotagem*/
     if (ui->combo_green->currentText() == "Altitude"){
         y1 = qv_altidude;
