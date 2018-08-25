@@ -123,6 +123,8 @@ void MainWindow::Read_Serial()
    qv_pressao.push_back(dados[1]);
    qv_temperatura.push_back(dados[2]);
    qv_aceleracao.push_back(dados[3]);
+    
+   //chamar plotagem para plotar assim que algo e recebido
 
 }
 //inutil
