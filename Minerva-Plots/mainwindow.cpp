@@ -62,6 +62,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     arduino = new QSerialPort(this);
     procSerial = new comserial(arduino);
+    connect(arduino, SIGNAL(readyRead()), this, SLOT(Read_Serial()));
 
     // Criacao do arquivo
     QFile arquivo("mobfog.txt");
@@ -109,9 +110,15 @@ void MainWindow::fun_plot(QVector<double> temp, QVector<double> Y1, QVector<doub
 void MainWindow::Read_Serial()
 {
    QString dados_recebidos = procSerial->Read(); //lembrando que procSerial é o objeto comserial que manipula a porta serial
+   QStringList dados_separados= dados_recebidos.split(";"); //ver separador
    QVector<float> dados;
-   dados.push_back(dados_recebidos.toFloat());
 
+   foreach(QString s, dados_separados)
+   {
+       dados.push_back(s.toFloat());
+   }
+    
+   //ver quantidade e ordem dos dados
    qv_altidude.push_back(dados[0]);
    qv_pressao.push_back(dados[1]);
    qv_temperatura.push_back(dados[2]);
