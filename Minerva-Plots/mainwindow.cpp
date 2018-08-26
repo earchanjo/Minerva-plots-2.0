@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->btn_add->setEnabled(false);
     ui->btn_stop->setEnabled(false);
 
-    //on_dev_update_clicked();
+    on_dev_update_clicked();
 
     // Configurando o grafico para ter dois eixos
     ui->plot->yAxis->setTickLabels(false);
@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     mTag2 = new AxisTag(mGraph2->valueAxis());
     mTag2->setPen(mGraph2->pen());
 
-    connect(&mDataTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
+    //connect(&mDataTimer, SIGNAL(timeout()), this, SLOT(timerSlot()));
     mDataTimer.start(40);
 
     // Configuracao da conexao serial com arduino
@@ -68,6 +68,9 @@ MainWindow::MainWindow(QWidget *parent) :
     // Criacao do arquivo
    QFile arquivo_final("mobfog.txt");
 
+   //configurando valores iniciais dos eixos
+   PassaDados();
+
 
 
   }
@@ -78,27 +81,31 @@ MainWindow::MainWindow(QWidget *parent) :
     delete ui;
   }
 
-void MainWindow::fun_plot(QVector<double> temp, QVector<double> Y1, QVector<double> Y2)
+void MainWindow::fun_plot(QVector<double> X, QVector<double> Y1, QVector<double> Y2)
   {
     // calculate and add a new data point to each graph:
-    mGraph1->addData(temp, Y1);
-    mGraph2->addData(temp, Y2);
+    if (!Y1.isEmpty() && !Y2.isEmpty() && !X.isEmpty())
+    {
+        mGraph1->addData(X, Y1);
+        mGraph2->addData(X, Y2);
 
-    // make key axis range scroll with the data:
-    ui->plot->xAxis->rescale();
-    mGraph1->rescaleValueAxis(false, true);
-    mGraph2->rescaleValueAxis(false, true);
-    ui->plot->xAxis->setRange(ui->plot->xAxis->range().upper, 100, Qt::AlignRight);
 
-    // update the vertical axis tag positions and texts to match the rightmost data point of the graphs:
-    double graph1Value = mGraph1->dataMainValue(mGraph1->dataCount()-1);
-    double graph2Value = mGraph2->dataMainValue(mGraph2->dataCount()-1);
-    mTag1->updatePosition(graph1Value);
-    mTag2->updatePosition(graph2Value);
-    mTag1->setText(QString::number(graph1Value, 'f', 2));
-    mTag2->setText(QString::number(graph2Value, 'f', 2));
+        // make key axis range scroll with the data:
+        ui->plot->xAxis->rescale();
+        mGraph1->rescaleValueAxis(false, true);
+        mGraph2->rescaleValueAxis(false, true);
+        ui->plot->xAxis->setRange(ui->plot->xAxis->range().upper, 100, Qt::AlignRight);
 
-    ui->plot->replot();
+        // update the vertical axis tag positions and texts to match the rightmost data point of the graphs:
+        double graph1Value = mGraph1->dataMainValue(mGraph1->dataCount()-1);
+        double graph2Value = mGraph2->dataMainValue(mGraph2->dataCount()-1);
+        mTag1->updatePosition(graph1Value);
+        mTag2->updatePosition(graph2Value);
+        mTag1->setText(QString::number(graph1Value, 'f', 2));
+        mTag2->setText(QString::number(graph2Value, 'f', 2));
+
+        ui->plot->replot();
+    }
 }
     /*Funcao Read_Serial() para ler a porta serial e ir separando os dados para cada vetor de variaveis
     Ira ler a porta serial e alocar em cada vetor correspondente os dados medidos nos sensores da seguinte maneira:
@@ -113,15 +120,13 @@ QVector<double> MainWindow::Read_Serial()
    QString dados_recebidos = procSerial->Read(); //lembrando que procSerial é o objeto comserial que manipula a porta serial
    QStringList lista_separada = dados_recebidos.split(";");
    QVector<double> dados;
-   QVector<double> x, y1, y2;
    //arquivo_final.open(QIODevice::WriteOnly);
    //arquivo_final.write(dados_recebidos.toUtf8());
    foreach(QString s, lista_separada){
             dados.push_back(s.toDouble());
-
        }
 
-   if(dados.length() == 7){ //1 a mais porque o ultimo caractere de lista_separada e vazio
+   if(dados.length() == 6){
        qv_altidude.push_back(dados[0]);
        qv_pressao.push_back(dados[1]);
        qv_temperatura.push_back(dados[2]);
@@ -129,14 +134,11 @@ QVector<double> MainWindow::Read_Serial()
        qv_temp.push_back(dados[4]);
        qv_id.push_back(dados[5]);
 
-       y1 = PassaDados()[1];
-       y2 = PassaDados()[2];
+       PassaDados();
 
-       if (ui->rd_idpackages->isChecked()){
-           fun_plot(qv_id,y1,y2);
-       }else if (ui->rd_seg->isChecked()){
-           fun_plot(qv_temp,y1,y2);
-       }
+       resetPlot();
+
+       fun_plot(x, y1, y2);
    }
 
   // arquivo_final.close();
@@ -147,6 +149,7 @@ QVector<double> MainWindow::Read_Serial()
 void MainWindow::LerArquivo(QFile &arquivo)
 {
     qv_temp.clear();
+    qv_id.clear();
     qv_altidude.clear();
     qv_pressao.clear();
     qv_temperatura.clear();
@@ -157,24 +160,21 @@ void MainWindow::LerArquivo(QFile &arquivo)
         while (!arq.atEnd()) {
             QString linha = arq.readLine();
             QStringList lista_separada = linha.split(";");
+            QVector<double> dados;
+
             if(lista_separada.length() == 6){
-                QVector<double> dados;
+
 
                 foreach(QString s, lista_separada){
-                    if(lista_separada.length() == 6){
                          dados.push_back(s.toDouble());
-                         qv_altidude.push_back(dados[0]);
-                         qv_pressao.push_back(dados[1]);
-                         qv_temperatura.push_back(dados[2]);
-                         qv_aceleracao.push_back(dados[3]);
-                         qv_temp.push_back(dados[4]);
-                         qv_id.push_back(dados[5]);
-                    }
                 }
 
-
-
-
+                qv_altidude.push_back(dados[0]);
+                qv_pressao.push_back(dados[1]);
+                qv_temperatura.push_back(dados[2]);
+                qv_aceleracao.push_back(dados[3]);
+                qv_temp.push_back(dados[4]);
+                qv_id.push_back(dados[5]);
             }
 
         }
@@ -196,7 +196,7 @@ void MainWindow::on_btn_add_clicked()
         else {
             qDebug() << "Falha ao abrir conexão serial.";
         }
-    dados1 = Read_Serial();
+    //dados1 = Read_Serial();
     /*Ira analisar qual opcao foi escolhida no combo menu, para colocar na funcao de plotagem*/
 
     };
@@ -207,13 +207,18 @@ void MainWindow::on_btn_add_clicked()
 //Limpa os vetores de dados e o grafico
 void MainWindow::on_btn_clear_clicked()
 {
-    ui->plot->clearGraphs();
-    ui->plot->replot();
+    resetPlot();
 
     qv_altidude.clear();
     qv_pressao.clear();
     qv_temperatura.clear();
     qv_aceleracao.clear();
+    qv_temp.clear();
+    qv_id.clear();
+
+    x.clear();
+    y1.clear();
+    y2.clear();
 }
 
 // Parar a conexao e plotagem
@@ -286,49 +291,6 @@ void MainWindow::on_dev_update_clicked()
         }
 }
 
-QVector<QVector<double>> MainWindow::PassaDados()
-{   QVector<double> x, y1, y2, dados1;
-    if (ui->combo_green->currentText() == "Altitude"){
-       // y1.clear();
-        y1 = qv_altidude;
-    }
-    else if (ui->combo_green->currentText() == "Pressao"){
-       // y1.clear();
-        y1 = qv_pressao;
-    }
-    else if (ui->combo_green->currentText() == "Temperatura"){
-       // y1.clear();
-        y1 = qv_temperatura;
-    }
-    else if (ui->combo_green->currentText() == "Aceleracao"){
-        //y1.clear();
-        y1 = qv_aceleracao;
-    }
-
-    if (ui->combo_orange->currentText() == "Altitude"){
-        //y2.clear();
-        y2 = qv_altidude;
-    }
-    else if (ui->combo_orange->currentText() == "Pressao"){
-        //y2.clear();
-        y2 = qv_pressao;
-    }
-    else if (ui->combo_orange->currentText() == "Temperatura"){
-        //y1.clear();
-        y2 = qv_temperatura;
-    }
-    else if (ui->combo_orange->currentText() == "Aceleracao"){
-        //y1.clear();
-        y2 = qv_aceleracao;
-    }
-
-    QVector<QVector<double>> vetor;
-    vetor.push_back(qv_temp);
-    vetor.push_back(y1);
-    vetor.push_back(y2);
-
-    return vetor;
-}
 // Salvar os arquivos
 void MainWindow::on_btn_save_clicked()
 {
@@ -346,27 +308,69 @@ void MainWindow::on_btn_save_clicked()
 //Botao para selecionar o arquivo de leitura para plotar
 void MainWindow::on_btn_open_file_clicked()
 {
-    QVector<double> y1,y2;
     QString filename = QFileDialog::getOpenFileName(this,tr("Open File"),"C://","All files (*.*);;Text file (*.txt)");
     QFile arquivo(filename);
     arquivo.setFileName(filename);
     if(!arquivo.exists()){
         qDebug() << "Arquivo nao existe!!";
-    };
-    arquivo.open(QIODevice::ReadOnly | QIODevice::Text);
-    if(!arquivo.isOpen()){
-        qDebug() << "Nao foi possivel abrir o arquivo selecionado";
-    }else{
-        LerArquivo(arquivo);
-        y1 = PassaDados()[1];
-        y2 = PassaDados()[2];
-        if (ui->rd_idpackages->isChecked()){
-            fun_plot(qv_id,y1,y2);
-        }else if (ui->rd_seg->isChecked()){
-            fun_plot(qv_temp,y1,y2);
+    }
+    else
+    {
+        arquivo.open(QIODevice::ReadOnly | QIODevice::Text);
+        if(!arquivo.isOpen()){
+            qDebug() << "Nao foi possivel abrir o arquivo selecionado";
+        }else{
+            LerArquivo(arquivo);
+            fun_plot(x,y1,y2);
         }
-
-
     }
 
+}
+
+void MainWindow::resetPlot()
+{
+    ui->plot->clearGraphs();
+    ui->plot->replot();
+    mGraph1 = ui->plot->addGraph(ui->plot->xAxis, ui->plot->axisRect()->axis(QCPAxis::atRight, 0));
+    mGraph2 = ui->plot->addGraph(ui->plot->xAxis, ui->plot->axisRect()->axis(QCPAxis::atRight, 1));
+    mGraph1->setPen(QPen(QColor(250, 120, 0)));
+    mGraph2->setPen(QPen(QColor(0, 180, 60)));
+}
+
+void MainWindow::PassaDados()
+{
+    if (ui->rd_idpackages->isChecked())
+    {
+        x=qv_id;
+    }
+    else if (ui->rd_seg->isChecked())
+    {
+        x=qv_temp;
+    }
+
+    if (ui->combo_green->currentText() == "Altitude"){
+        y1 = qv_altidude;
+    }
+    else if (ui->combo_green->currentText() == "Pressao"){
+        y1 = qv_pressao;
+    }
+    else if (ui->combo_green->currentText() == "Temperatura"){
+        y1 = qv_temperatura;
+    }
+    else if (ui->combo_green->currentText() == "Aceleracao"){
+        y1 = qv_aceleracao;
+    }
+
+    if (ui->combo_orange->currentText() == "Altitude"){
+        y2 = qv_altidude;
+    }
+    else if (ui->combo_orange->currentText() == "Pressao"){
+        y2 = qv_pressao;
+    }
+    else if (ui->combo_orange->currentText() == "Temperatura"){
+        y2 = qv_temperatura;
+    }
+    else if (ui->combo_orange->currentText() == "Aceleracao"){
+        y2 = qv_aceleracao;
+    }
 }

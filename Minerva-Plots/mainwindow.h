@@ -29,7 +29,8 @@ private slots:
     QVector<double> Read_Serial();
     void LerArquivo(QFile &arquivo);
     void on_dev_update_clicked();
-    QVector<QVector<double>> PassaDados();
+    void PassaDados();
+    void resetPlot();
 
     //void on_combo_activated(const QString &arg1);
 
@@ -50,6 +51,7 @@ private:
     QTimer mDataTimer;
     QVector<double> qv_altidude, qv_pressao, qv_temperatura, qv_aceleracao;
     QVector<double> qv_temp,qv_id;
+    QVector<double> x, y1, y2;
     QFile arquivo_final;
 };
 
