@@ -114,24 +114,28 @@ QVector<double> MainWindow::Read_Serial()
    QStringList lista_separada = dados_recebidos.split(";");
    QVector<double> dados;
    QVector<double> x, y1, y2;
-   arquivo_final.open(QIODevice::WriteOnly);
-   arquivo_final.write(dados_recebidos.toUtf8());
+   //arquivo_final.open(QIODevice::WriteOnly);
+   //arquivo_final.write(dados_recebidos.toUtf8());
    foreach(QString s, lista_separada){
-       if(lista_separada.length() == 6){
             dados.push_back(s.toDouble());
-            qv_altidude.push_back(dados[0]);
-            qv_pressao.push_back(dados[1]);
-            qv_temperatura.push_back(dados[2]);
-            qv_aceleracao.push_back(dados[3]);
-            y1 = PassaDados()[1];
-            y2 = PassaDados()[2];
 
-            fun_plot(qv_temp,y1,y2);
        }
-   arquivo_final.close();
+
+   if(dados.length() == 7){ //1 a mais porque o ultimo caractere de lista_separada e vazio
+       qv_altidude.push_back(dados[0]);
+       qv_pressao.push_back(dados[1]);
+       qv_temperatura.push_back(dados[2]);
+       qv_aceleracao.push_back(dados[3]);
+       qv_temp.push_back(dados[4]);
+
+       y1 = PassaDados()[1];
+       y2 = PassaDados()[2];
+
+       fun_plot(qv_temp,y1,y2);
+
    }
 
-
+  // arquivo_final.close();
    return dados;
 
 }
@@ -299,50 +303,50 @@ void MainWindow::on_dev_update_clicked()
 QVector<QVector<double>> MainWindow::PassaDados()
 {   QVector<double> x, y1, y2, dados1;
     if (ui->combo_green->currentText() == "Altitude"){
-        y1.clear();
+       // y1.clear();
         y1 = qv_altidude;
     }
     else if (ui->combo_green->currentText() == "Pressao"){
-        y1.clear();
+       // y1.clear();
         y1 = qv_pressao;
     }
     else if (ui->combo_green->currentText() == "Temperatura"){
-        y1.clear();
+       // y1.clear();
         y1 = qv_temperatura;
     }
     else if (ui->combo_green->currentText() == "Aceleracao"){
-        y1.clear();
+        //y1.clear();
         y1 = qv_aceleracao;
     }
 
     if (ui->combo_orange->currentText() == "Altitude"){
-        y2.clear();
+        //y2.clear();
         y2 = qv_altidude;
     }
     else if (ui->combo_orange->currentText() == "Pressao"){
-        y2.clear();
+        //y2.clear();
         y2 = qv_pressao;
     }
     else if (ui->combo_orange->currentText() == "Temperatura"){
-        y1.clear();
+        //y1.clear();
         y2 = qv_temperatura;
     }
     else if (ui->combo_orange->currentText() == "Aceleracao"){
-        y1.clear();
+        //y1.clear();
         y2 = qv_aceleracao;
     }
 
     // checkar qual sera os dados do eixo X, segundos ou id dos pacotes que chegam
     // obs: perguntar a HB como capta os id packages e coloca nos vetores
 
-    if (ui->rd_idpackages->isChecked()){
+    /*if (ui->rd_idpackages->isChecked()){
         qv_temp.clear();
         qv_temp.push_back(dados1[4]);
     }
     else if (ui->rd_seg->isChecked()){
         qv_temp.clear();
         qv_temp.push_back(dados1[5]);
-    }
+    }*/
     QVector<QVector<double>> vetor;
     vetor.push_back(qv_temp);
     vetor.push_back(y1);
