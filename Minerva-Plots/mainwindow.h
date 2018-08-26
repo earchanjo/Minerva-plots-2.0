@@ -49,7 +49,7 @@ private:
     AxisTag *mTag2;
     QTimer mDataTimer;
     QVector<double> qv_altidude, qv_pressao, qv_temperatura, qv_aceleracao;
-    QVector<double> qv_temp;
+    QVector<double> qv_temp,qv_id;
     QFile arquivo_final;
 };
 

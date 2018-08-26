@@ -127,12 +127,16 @@ QVector<double> MainWindow::Read_Serial()
        qv_temperatura.push_back(dados[2]);
        qv_aceleracao.push_back(dados[3]);
        qv_temp.push_back(dados[4]);
+       qv_id.push_back(dados[5]);
 
        y1 = PassaDados()[1];
        y2 = PassaDados()[2];
 
-       fun_plot(qv_temp,y1,y2);
-
+       if (ui->rd_idpackages->isChecked()){
+           fun_plot(qv_id,y1,y2);
+       }else if (ui->rd_seg->isChecked()){
+           fun_plot(qv_temp,y1,y2);
+       }
    }
 
   // arquivo_final.close();
@@ -163,14 +167,8 @@ void MainWindow::LerArquivo(QFile &arquivo)
                          qv_pressao.push_back(dados[1]);
                          qv_temperatura.push_back(dados[2]);
                          qv_aceleracao.push_back(dados[3]);
-                         if (ui->rd_idpackages->isChecked()){
-                             qv_temp.clear();
-                             qv_temp.push_back(dados[4]);
-                         }
-                         else if(ui->rd_seg->isChecked()){
-                             qv_temp.clear();
-                             qv_temp.push_back(dados[5]);
-                         }
+                         qv_temp.push_back(dados[4]);
+                         qv_id.push_back(dados[5]);
                     }
                 }
 
@@ -182,18 +180,6 @@ void MainWindow::LerArquivo(QFile &arquivo)
         }
     }
 }
-//inutil
-void MainWindow::addPoint()
-{
-
-}
-//inutil
-void MainWindow::clearData()
-{
-
-}
-
-
 // Funcao para comecar a ler os dados da porta serial
 void MainWindow::on_btn_add_clicked()
 {
@@ -336,17 +322,6 @@ QVector<QVector<double>> MainWindow::PassaDados()
         y2 = qv_aceleracao;
     }
 
-    // checkar qual sera os dados do eixo X, segundos ou id dos pacotes que chegam
-    // obs: perguntar a HB como capta os id packages e coloca nos vetores
-
-    /*if (ui->rd_idpackages->isChecked()){
-        qv_temp.clear();
-        qv_temp.push_back(dados1[4]);
-    }
-    else if (ui->rd_seg->isChecked()){
-        qv_temp.clear();
-        qv_temp.push_back(dados1[5]);
-    }*/
     QVector<QVector<double>> vetor;
     vetor.push_back(qv_temp);
     vetor.push_back(y1);
@@ -385,7 +360,12 @@ void MainWindow::on_btn_open_file_clicked()
         LerArquivo(arquivo);
         y1 = PassaDados()[1];
         y2 = PassaDados()[2];
-        fun_plot(qv_temp,y1,y2);
+        if (ui->rd_idpackages->isChecked()){
+            fun_plot(qv_id,y1,y2);
+        }else if (ui->rd_seg->isChecked()){
+            fun_plot(qv_temp,y1,y2);
+        }
+
 
     }
 
