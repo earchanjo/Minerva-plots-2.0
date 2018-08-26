@@ -26,7 +26,7 @@ private slots:
     void on_btn_clear_clicked();
     void on_btn_stop_clicked();
     void fun_plot(QVector<double> temp, QVector<double> x, QVector<double> y);
-    QVector<double> Read_Serial();
+    void Read_Serial();
     void LerArquivo(QFile &arquivo);
     void on_dev_update_clicked();
     void PassaDados();
@@ -53,6 +53,7 @@ private:
     QVector<double> qv_temp,qv_id;
     QVector<double> x, y1, y2;
     QFile arquivo_final;
+    QString dados_recebidos_global;
 };
 
 #endif // MAINWINDOW_H

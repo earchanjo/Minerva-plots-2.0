@@ -10,15 +10,13 @@
 /*PROGAMA PARA PLOTAGEM DOS DADOS RECEBIDOS DO MOBFOG EM TEMPO REAL.
  *E UTILIZADO A BIBLIOTECA QCUSTOMPLOT PARA MANIPULAR O GRAFICO.
  *
- * ATUALIZACAO DO QUE FALTA:
- * 1- Criar a funcao de save dos dados recebidos ao pressionar o botao save
- * (check)2- Terminar a funcao "on_btn_add_clicked()" responsavel por comecar a conexao e plotagem dos dados;
- * 3 - Ver a questao do connect
+ * ATUALIZACAO:
+ * 1 - Descomenteia linha da chamada o read_serial(), para que o botao de plot funcionasse;
+ * 2 - Retirei o retorno de read_serial(). Voltou a ficar void;
+ * 3 - Criei uma variavel global dados_recebidos_global onde ficara os dados que entram direto da porta serial,
+ *      para la na funcao de salvar ela seja adicionada no arquivo_final, que é o arquivo que o programa salva.
  *
- * PROBLEMAS:
- * (check) 1 - Programa nao inicia. Para de funcionar assim que compila
  *
- * OBS: Estou cogitando em retirar os radiobuttons de escolha, e colocar o combo mesmo
  *
 */
 
@@ -115,13 +113,12 @@ void MainWindow::fun_plot(QVector<double> X, QVector<double> Y1, QVector<double>
     . serial[3] = aceleracao;
     */
 
-QVector<double> MainWindow::Read_Serial()
+void MainWindow::Read_Serial()
 {
    QString dados_recebidos = procSerial->Read(); //lembrando que procSerial é o objeto comserial que manipula a porta serial
+   dados_recebidos_global.push_back(dados_recebidos);
    QStringList lista_separada = dados_recebidos.split(";");
    QVector<double> dados;
-   //arquivo_final.open(QIODevice::WriteOnly);
-   //arquivo_final.write(dados_recebidos.toUtf8());
    foreach(QString s, lista_separada){
             dados.push_back(s.toDouble());
        }
@@ -141,7 +138,7 @@ QVector<double> MainWindow::Read_Serial()
        fun_plot(x, y1, y2);
    }
 
-  // arquivo_final.close();
+
    return dados;
 
 }
@@ -196,7 +193,7 @@ void MainWindow::on_btn_add_clicked()
         else {
             qDebug() << "Falha ao abrir conexão serial.";
         }
-    //dados1 = Read_Serial();
+    Read_Serial();// nao comenta essa linha senao o botao nao funciona
     /*Ira analisar qual opcao foi escolhida no combo menu, para colocar na funcao de plotagem*/
 
     };
@@ -301,9 +298,12 @@ void MainWindow::on_btn_save_clicked()
         QFile arq(filename);
         if(!arq.open(QIODevice::WriteOnly)){
             qDebug() << "Impossivel abrir o arquivo";
+        }else{
+            arq.write(dados_recebidos_global.toUtf8()); //converto para para UTF8 data para poder adicionar ao arquivo.
+            arq.close();
         } /*Para salvar o arquivo lembre-se colocar aquela variavel globar vector que vai armazenar tudo da porta serial*/
     }
-
+    dados_recebidos_global.clear();
 }
 //Botao para selecionar o arquivo de leitura para plotar
 void MainWindow::on_btn_open_file_clicked()
