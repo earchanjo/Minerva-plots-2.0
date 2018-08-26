@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->btn_add->setEnabled(false);
     ui->btn_stop->setEnabled(false);
 
-    on_dev_update_clicked();
+    //on_dev_update_clicked();
 
     // Configurando o grafico para ter dois eixos
     ui->plot->yAxis->setTickLabels(false);
