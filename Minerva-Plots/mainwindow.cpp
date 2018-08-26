@@ -63,6 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     arduino = new QSerialPort(this);
     procSerial = new comserial(arduino);
+    connect(arduino, SIGNAL(readyRead()), this, SLOT(Read_Serial()));
 
     // Criacao do arquivo
    QFile arquivo_final("mobfog.txt");
