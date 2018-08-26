@@ -6,16 +6,17 @@
 #include <QSerialPortInfo>
 #include <QDebug>
 #include <QFile>
+#include <QFileDialog>
 /*PROGAMA PARA PLOTAGEM DOS DADOS RECEBIDOS DO MOBFOG EM TEMPO REAL.
  *E UTILIZADO A BIBLIOTECA QCUSTOMPLOT PARA MANIPULAR O GRAFICO.
  *
  * ATUALIZACAO DO QUE FALTA:
  * 1- Criar a funcao de save dos dados recebidos ao pressionar o botao save
- * 2- Terminar a funcao "on_btn_add_clicked()" responsavel por comecar a conexao e plotagem dos dados;
- *
+ * (check)2- Terminar a funcao "on_btn_add_clicked()" responsavel por comecar a conexao e plotagem dos dados;
+ * 3 - Ver a questao do connect
  *
  * PROBLEMAS:
- * 1 - Programa nao inicia. Para de funcionar assim que compila
+ * (check) 1 - Programa nao inicia. Para de funcionar assim que compila
  *
  * OBS: Estou cogitando em retirar os radiobuttons de escolha, e colocar o combo mesmo
  *
@@ -33,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->btn_add->setEnabled(false);
     ui->btn_stop->setEnabled(false);
 
-    on_dev_update_clicked();
+    //on_dev_update_clicked();
 
     // Configurando o grafico para ter dois eixos
     ui->plot->yAxis->setTickLabels(false);
@@ -62,10 +63,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     arduino = new QSerialPort(this);
     procSerial = new comserial(arduino);
-    connect(arduino, SIGNAL(readyRead()), this, SLOT(Read_Serial()));
 
     // Criacao do arquivo
-    QFile arquivo("mobfog.txt");
+   QFile arquivo_final("mobfog.txt");
 
 
 
@@ -107,25 +107,75 @@ void MainWindow::fun_plot(QVector<double> temp, QVector<double> Y1, QVector<doub
     . serial[3] = aceleracao;
     */
 
-void MainWindow::Read_Serial()
+QVector<double> MainWindow::Read_Serial()
 {
    QString dados_recebidos = procSerial->Read(); //lembrando que procSerial é o objeto comserial que manipula a porta serial
-   QStringList dados_separados= dados_recebidos.split(";"); //ver separador
-   QVector<float> dados;
+   QStringList lista_separada = dados_recebidos.split(";");
+   QVector<double> dados;
+   QVector<double> x, y1, y2;
+   arquivo_final.open(QIODevice::WriteOnly);
+   arquivo_final.write(dados_recebidos.toUtf8());
+   foreach(QString s, lista_separada){
+       if(lista_separada.length() == 6){
+            dados.push_back(s.toDouble());
+            qv_altidude.push_back(dados[0]);
+            qv_pressao.push_back(dados[1]);
+            qv_temperatura.push_back(dados[2]);
+            qv_aceleracao.push_back(dados[3]);
+            y1 = PassaDados()[1];
+            y2 = PassaDados()[2];
 
-   foreach(QString s, dados_separados)
-   {
-       dados.push_back(s.toFloat());
+            fun_plot(qv_temp,y1,y2);
+       }
+   arquivo_final.close();
    }
-    
-   //ver quantidade e ordem dos dados
-   qv_altidude.push_back(dados[0]);
-   qv_pressao.push_back(dados[1]);
-   qv_temperatura.push_back(dados[2]);
-   qv_aceleracao.push_back(dados[3]);
-    
-   //chamar plotagem para plotar assim que algo e recebido
 
+
+   return dados;
+
+}
+
+void MainWindow::LerArquivo(QFile &arquivo)
+{
+    qv_temp.clear();
+    qv_altidude.clear();
+    qv_pressao.clear();
+    qv_temperatura.clear();
+    qv_aceleracao.clear();
+
+    if(!arquivo.open(QIODevice::ReadOnly)){
+        QTextStream arq(&arquivo);
+        while (!arq.atEnd()) {
+            QString linha = arq.readLine();
+            QStringList lista_separada = linha.split(";");
+            if(lista_separada.length() == 6){
+                QVector<double> dados;
+
+                foreach(QString s, lista_separada){
+                    if(lista_separada.length() == 6){
+                         dados.push_back(s.toDouble());
+                         qv_altidude.push_back(dados[0]);
+                         qv_pressao.push_back(dados[1]);
+                         qv_temperatura.push_back(dados[2]);
+                         qv_aceleracao.push_back(dados[3]);
+                         if (ui->rd_idpackages->isChecked()){
+                             qv_temp.clear();
+                             qv_temp.push_back(dados[4]);
+                         }
+                         else if(ui->rd_seg->isChecked()){
+                             qv_temp.clear();
+                             qv_temp.push_back(dados[5]);
+                         }
+                    }
+                }
+
+
+
+
+            }
+
+        }
+    }
 }
 //inutil
 void MainWindow::addPoint()
@@ -143,7 +193,7 @@ void MainWindow::clearData()
 void MainWindow::on_btn_add_clicked()
 {
     bool statusOpenSerial;
-    QVector<float> x, y1, y2;
+    QVector<double> x, y1, y2, dados1;
    // bool radio_btn_graph1, radio_btn_graph2;
 
         statusOpenSerial = procSerial->Conectar(ui->combo->currentText(),9600);
@@ -155,43 +205,13 @@ void MainWindow::on_btn_add_clicked()
         else {
             qDebug() << "Falha ao abrir conexão serial.";
         }
-    
+    dados1 = Read_Serial();
     /*Ira analisar qual opcao foi escolhida no combo menu, para colocar na funcao de plotagem*/
-    if (ui->combo_green->currentText() == "Altitude"){
-        y1 = qv_altidude;
-    }
-    else if (ui->combo_green->currentText() == "Pressao"){
-        y1 = qv_pressao;
-    }
-    else if (ui->combo_green->currentText() == "Temperatura"){
-        y1 = qv_temperatura;
-    }
-    else if (ui->combo_green->currentText() == "Aceleracao"){
-        y1 = qv_aceleracao;
-    }
 
-    if (ui->combo_orange->currentText() == "Altitude"){
-        y2 = qv_altidude;
-    }
-    else if (ui->combo_orange->currentText() == "Pressao"){
-        y2 = qv_pressao;
-    }
-    else if (ui->combo_orange->currentText() == "Temperatura"){
-        y2 = qv_temperatura;
-    }
-    else if (ui->combo_orange->currentText() == "Aceleracao"){
-        y2 = qv_aceleracao;
-    }
+    };
 
-    // checkar qual sera os dados do eixo X, segundos ou id dos pacotes que chegam
-    // obs: perguntar a HB como capta os id packages e coloca nos vetores
 
-    if (ui->rd_idpackages->isChecked()){
 
-    }
-    else if (ui->rd_seg->isChecked()){}
-
-    }
 
 //Limpa os vetores de dados e o grafico
 void MainWindow::on_btn_clear_clicked()
@@ -272,10 +292,96 @@ void MainWindow::on_dev_update_clicked()
         /*else {
             ui->teLog->append("### Falha ao fechar conexão serial.");
         }*/
+        }
 }
+
+QVector<QVector<double>> MainWindow::PassaDados()
+{   QVector<double> x, y1, y2, dados1;
+    if (ui->combo_green->currentText() == "Altitude"){
+        y1.clear();
+        y1 = qv_altidude;
+    }
+    else if (ui->combo_green->currentText() == "Pressao"){
+        y1.clear();
+        y1 = qv_pressao;
+    }
+    else if (ui->combo_green->currentText() == "Temperatura"){
+        y1.clear();
+        y1 = qv_temperatura;
+    }
+    else if (ui->combo_green->currentText() == "Aceleracao"){
+        y1.clear();
+        y1 = qv_aceleracao;
+    }
+
+    if (ui->combo_orange->currentText() == "Altitude"){
+        y2.clear();
+        y2 = qv_altidude;
+    }
+    else if (ui->combo_orange->currentText() == "Pressao"){
+        y2.clear();
+        y2 = qv_pressao;
+    }
+    else if (ui->combo_orange->currentText() == "Temperatura"){
+        y1.clear();
+        y2 = qv_temperatura;
+    }
+    else if (ui->combo_orange->currentText() == "Aceleracao"){
+        y1.clear();
+        y2 = qv_aceleracao;
+    }
+
+    // checkar qual sera os dados do eixo X, segundos ou id dos pacotes que chegam
+    // obs: perguntar a HB como capta os id packages e coloca nos vetores
+
+    if (ui->rd_idpackages->isChecked()){
+        qv_temp.clear();
+        qv_temp.push_back(dados1[4]);
+    }
+    else if (ui->rd_seg->isChecked()){
+        qv_temp.clear();
+        qv_temp.push_back(dados1[5]);
+    }
+    QVector<QVector<double>> vetor;
+    vetor.push_back(qv_temp);
+    vetor.push_back(y1);
+    vetor.push_back(y2);
+
+    return vetor;
 }
 // Salvar os arquivos
 void MainWindow::on_btn_save_clicked()
 {
+    QString filename = QFileDialog::getSaveFileName(this,tr("Save"),"C://",tr("Text File (*.txt);;CSV Files (*.csv);;All Files(*.*)"));
+    if(filename.isEmpty()){
+        qDebug() << "Nenhum nome para o arquivo";
+    }else{
+        QFile arq(filename);
+        if(!arq.open(QIODevice::WriteOnly)){
+            qDebug() << "Impossivel abrir o arquivo";
+        } /*Para salvar o arquivo lembre-se colocar aquela variavel globar vector que vai armazenar tudo da porta serial*/
+    }
+
+}
+//Botao para selecionar o arquivo de leitura para plotar
+void MainWindow::on_btn_open_file_clicked()
+{
+    QVector<double> y1,y2;
+    QString filename = QFileDialog::getOpenFileName(this,tr("Open File"),"C://","All files (*.*);;Text file (*.txt)");
+    QFile arquivo(filename);
+    arquivo.setFileName(filename);
+    if(!arquivo.exists()){
+        qDebug() << "Arquivo nao existe!!";
+    };
+    arquivo.open(QIODevice::ReadOnly | QIODevice::Text);
+    if(!arquivo.isOpen()){
+        qDebug() << "Nao foi possivel abrir o arquivo selecionado";
+    }else{
+        LerArquivo(arquivo);
+        y1 = PassaDados()[1];
+        y2 = PassaDados()[2];
+        fun_plot(qv_temp,y1,y2);
+
+    }
 
 }

@@ -46,7 +46,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>CONNECT</string>
+     <string>PLOTAR</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btn_clear">
@@ -101,121 +101,17 @@
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Gráfico 1(VERDE):&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
-   <widget class="QRadioButton" name="rd_alt_green">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>80</y>
-      <width>84</width>
-      <height>19</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Altitude</string>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="rd_pres_green">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>100</y>
-      <width>84</width>
-      <height>19</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Pressão</string>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="rd_temp_green">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>120</y>
-      <width>84</width>
-      <height>19</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Temperatura</string>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="rd_ace_green">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>140</y>
-      <width>84</width>
-      <height>19</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Aceleração</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
       <x>470</x>
-      <y>190</y>
+      <y>110</y>
       <width>141</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Gráfico 2(LARANJA):&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="rd_alt_orange">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>210</y>
-      <width>84</width>
-      <height>19</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Altitude</string>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="rd_pres_orange">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>230</y>
-      <width>84</width>
-      <height>19</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Pressão</string>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="rd_temp_orange">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>250</y>
-      <width>84</width>
-      <height>19</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Temperatura</string>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="rd_ace_orange">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>270</y>
-      <width>84</width>
-      <height>19</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Aceleração</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btn_save">
@@ -270,8 +166,8 @@
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>300</y>
+      <x>470</x>
+      <y>160</y>
       <width>51</width>
       <height>21</height>
      </rect>
@@ -283,8 +179,8 @@
    <widget class="QRadioButton" name="rd_idpackages">
     <property name="geometry">
      <rect>
-      <x>480</x>
-      <y>320</y>
+      <x>470</x>
+      <y>180</y>
       <width>84</width>
       <height>19</height>
      </rect>
@@ -296,8 +192,8 @@
    <widget class="QRadioButton" name="rd_seg">
     <property name="geometry">
      <rect>
-      <x>580</x>
-      <y>320</y>
+      <x>560</x>
+      <y>180</y>
       <width>84</width>
       <height>19</height>
      </rect>
@@ -309,7 +205,7 @@
    <widget class="QComboBox" name="combo_green">
     <property name="geometry">
      <rect>
-      <x>580</x>
+      <x>480</x>
       <y>80</y>
       <width>91</width>
       <height>22</height>
@@ -339,8 +235,8 @@
    <widget class="QComboBox" name="combo_orange">
     <property name="geometry">
      <rect>
-      <x>580</x>
-      <y>220</y>
+      <x>480</x>
+      <y>130</y>
       <width>91</width>
       <height>22</height>
      </rect>
@@ -365,6 +261,32 @@
       <string>Aceleracao</string>
      </property>
     </item>
+   </widget>
+   <widget class="QPushButton" name="btn_open_file">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>250</y>
+      <width>80</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Open File</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ler_arquivo">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>250</y>
+      <width>121</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt; font-weight:600;&quot;&gt;Ler arquivo&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">

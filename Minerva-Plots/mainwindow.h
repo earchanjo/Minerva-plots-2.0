@@ -26,15 +26,16 @@ private slots:
     void on_btn_clear_clicked();
     void on_btn_stop_clicked();
     void fun_plot(QVector<double> temp, QVector<double> x, QVector<double> y);
-    void Read_Serial();
-
+    QVector<double> Read_Serial();
+    void LerArquivo(QFile &arquivo);
     void on_dev_update_clicked();
+    QVector<QVector<double>> PassaDados();
 
-    void on_list_dev_activated(const QString &arg1);
-
-    void on_combo_activated(const QString &arg1);
+    //void on_combo_activated(const QString &arg1);
 
     void on_btn_save_clicked();
+
+    void on_btn_open_file_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -47,7 +48,9 @@ private:
     AxisTag *mTag1;
     AxisTag *mTag2;
     QTimer mDataTimer;
-    QVector<float> qv_altidude, qv_pressao, qv_temperatura, qv_aceleracao, qv_temp, qv_idPackage;
+    QVector<double> qv_altidude, qv_pressao, qv_temperatura, qv_aceleracao;
+    QVector<double> qv_temp;
+    QFile arquivo_final;
 };
 
 #endif // MAINWINDOW_H

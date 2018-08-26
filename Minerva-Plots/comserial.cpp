@@ -167,7 +167,7 @@ QString comserial::Read()
     while (devSerial->canReadLine())
     {
       line=devSerial->readLine();
-      //line.chop(1);
+      line.chop(2);
       qDebug() <<"line:" << line;
 
     }
