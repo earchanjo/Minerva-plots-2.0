@@ -16,6 +16,10 @@
  * 3 - Criei uma variavel global dados_recebidos_global onde ficara os dados que entram direto da porta serial,
  *      para la na funcao de salvar ela seja adicionada no arquivo_final, que é o arquivo que o programa salva.
  *
+ * requisitos de uso:
+ * driver para arduino ou outro microcontrolador que sera usado
+ * "sudo apt-get install libgl-dev" se ocorrer "<GL/gl.h> not found" no linux
+ *
  *
  *
 */
@@ -112,6 +116,7 @@ void MainWindow::fun_plot(QVector<double> X, QVector<double> Y1, QVector<double>
     . serial[2] = temperatura;
     . serial[3] = aceleracao;
     */
+
 
 void MainWindow::Read_Serial()
 {
@@ -215,9 +220,15 @@ void MainWindow::on_btn_clear_clicked()
     y2.clear();
 }
 
+/*
+ * BUG: QUANDO TESTADO EM UM PC COM LINUX, FECHEI A SERIAL E LIMPEI O PLOT (BOTOES STOP E CLEAR) PARA ABRIR NOVAMENTE (BOTAO PLOT) E VER SE ESTAVA TUDO CERTO.
+ * ESTAVA SENDO RECEBIDO UM RESIDUO DA EXECUCAO ANTERIOR DO CODIGO DO ARDUINO, PROVAVELMENTE ELE JA ESTAVA NA SERIAL E SO FOI LIDO DEPOIS.
+ * CLICANDO STOP E DEPOIS DEVICE_LIST. FUNCIONA COMO DEVERIA.
+*/
 // Parar a conexao e plotagem
 void MainWindow::on_btn_stop_clicked()
 {
+
     bool statusCloseSerial;
 
 
@@ -233,11 +244,13 @@ void MainWindow::on_btn_stop_clicked()
         if (statusCloseSerial) {
             ui->btn_stop->setEnabled(false);
             ui->btn_add->setEnabled(true);
+
             qDebug() << "### Porta serial fechada com sucesso!";
         }
         else {
             qDebug() << "### Falha ao fechar conexão serial.";
         }
+
 }
 
 // Atualizar a lista de portas disponiveis para conexao
