@@ -224,6 +224,7 @@ void MainWindow::on_btn_clear_clicked()
  * BUG: QUANDO TESTADO EM UM PC COM LINUX, FECHEI A SERIAL E LIMPEI O PLOT (BOTOES STOP E CLEAR) PARA ABRIR NOVAMENTE (BOTAO PLOT) E VER SE ESTAVA TUDO CERTO.
  * ESTAVA SENDO RECEBIDO UM RESIDUO DA EXECUCAO ANTERIOR DO CODIGO DO ARDUINO, PROVAVELMENTE ELE JA ESTAVA NA SERIAL E SO FOI LIDO DEPOIS.
  * CLICANDO STOP E DEPOIS DEVICE_LIST. FUNCIONA COMO DEVERIA.
+ * CORRIGIDO COLOCANDO UM "procSerial->CarregarDispositivos();"
 */
 // Parar a conexao e plotagem
 void MainWindow::on_btn_stop_clicked()
@@ -244,6 +245,10 @@ void MainWindow::on_btn_stop_clicked()
         if (statusCloseSerial) {
             ui->btn_stop->setEnabled(false);
             ui->btn_add->setEnabled(true);
+
+            //on_dev_update_clicked();
+            procSerial->CarregarDispositivos(); //para corrigir o bug 
+
 
             qDebug() << "### Porta serial fechada com sucesso!";
         }
