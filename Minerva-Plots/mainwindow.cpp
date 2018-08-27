@@ -32,7 +32,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->btn_add->setEnabled(false);
     ui->btn_stop->setEnabled(false);
 
-    //on_dev_update_clicked();
 
     // Configurando o grafico para ter dois eixos
     ui->plot->yAxis->setTickLabels(false);
@@ -45,8 +44,8 @@ MainWindow::MainWindow(QWidget *parent) :
     // Criando oos graficos
     mGraph1 = ui->plot->addGraph(ui->plot->xAxis, ui->plot->axisRect()->axis(QCPAxis::atRight, 0));
     mGraph2 = ui->plot->addGraph(ui->plot->xAxis, ui->plot->axisRect()->axis(QCPAxis::atRight, 1));
-    mGraph1->setPen(QPen(QColor(250, 120, 0)));
-    mGraph2->setPen(QPen(QColor(0, 180, 60)));
+    mGraph1->setPen(QPen(QColor(0, 180, 60)));
+    mGraph2->setPen(QPen(QColor(250, 120, 0)));
 
     // Criando as tags que acompanharao os valores do grafico no eixo vertical
     mTag1 = new AxisTag(mGraph1->valueAxis());
@@ -62,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
     arduino = new QSerialPort(this);
     procSerial = new comserial(arduino);
     connect(arduino, SIGNAL(readyRead()), this, SLOT(Read_Serial()));
+    on_dev_update_clicked();
 
     // Criacao do arquivo
    QFile arquivo_final("mobfog.txt");
@@ -117,6 +117,7 @@ void MainWindow::Read_Serial()
 {
    QString dados_recebidos = procSerial->Read(); //lembrando que procSerial é o objeto comserial que manipula a porta serial
    dados_recebidos_global.push_back(dados_recebidos);
+   dados_recebidos_global.push_back("\r\n"); //pula linha no arquivo
    QStringList lista_separada = dados_recebidos.split(";");
    QVector<double> dados;
    foreach(QString s, lista_separada){
@@ -133,13 +134,8 @@ void MainWindow::Read_Serial()
 
        PassaDados();
 
-       resetPlot();
-
        fun_plot(x, y1, y2);
    }
-
-
-   return dados;
 
 }
 
@@ -172,6 +168,7 @@ void MainWindow::LerArquivo(QFile &arquivo)
                 qv_aceleracao.push_back(dados[3]);
                 qv_temp.push_back(dados[4]);
                 qv_id.push_back(dados[5]);
+
             }
 
         }
@@ -181,7 +178,7 @@ void MainWindow::LerArquivo(QFile &arquivo)
 void MainWindow::on_btn_add_clicked()
 {
     bool statusOpenSerial;
-    QVector<double> x, y1, y2, dados1;
+    //QVector<double> x, y1, y2, dados1;
    // bool radio_btn_graph1, radio_btn_graph2;
 
         statusOpenSerial = procSerial->Conectar(ui->combo->currentText(),9600);
@@ -193,7 +190,7 @@ void MainWindow::on_btn_add_clicked()
         else {
             qDebug() << "Falha ao abrir conexão serial.";
         }
-    Read_Serial();// nao comenta essa linha senao o botao nao funciona
+    //Read_Serial();// verificar necessidade
     /*Ira analisar qual opcao foi escolhida no combo menu, para colocar na funcao de plotagem*/
 
     };
@@ -301,9 +298,11 @@ void MainWindow::on_btn_save_clicked()
         }else{
             arq.write(dados_recebidos_global.toUtf8()); //converto para para UTF8 data para poder adicionar ao arquivo.
             arq.close();
+            dados_recebidos_global.clear();
+            qDebug() << "Salvo!";
         } /*Para salvar o arquivo lembre-se colocar aquela variavel globar vector que vai armazenar tudo da porta serial*/
     }
-    dados_recebidos_global.clear();
+
 }
 //Botao para selecionar o arquivo de leitura para plotar
 void MainWindow::on_btn_open_file_clicked()
@@ -321,7 +320,12 @@ void MainWindow::on_btn_open_file_clicked()
             qDebug() << "Nao foi possivel abrir o arquivo selecionado";
         }else{
             LerArquivo(arquivo);
-            fun_plot(x,y1,y2);
+
+            resetPlot();
+
+            PassaDados();
+
+            fun_plot(x, y1, y2);
         }
     }
 
@@ -333,8 +337,8 @@ void MainWindow::resetPlot()
     ui->plot->replot();
     mGraph1 = ui->plot->addGraph(ui->plot->xAxis, ui->plot->axisRect()->axis(QCPAxis::atRight, 0));
     mGraph2 = ui->plot->addGraph(ui->plot->xAxis, ui->plot->axisRect()->axis(QCPAxis::atRight, 1));
-    mGraph1->setPen(QPen(QColor(250, 120, 0)));
-    mGraph2->setPen(QPen(QColor(0, 180, 60)));
+    mGraph1->setPen(QPen(QColor(0, 180, 60)));
+    mGraph2->setPen(QPen(QColor(250, 120, 0)));
 }
 
 void MainWindow::PassaDados()
@@ -373,4 +377,68 @@ void MainWindow::PassaDados()
     else if (ui->combo_orange->currentText() == "Aceleracao"){
         y2 = qv_aceleracao;
     }
+}
+
+void MainWindow::on_combo_green_currentTextChanged(const QString &newText)
+{
+    resetPlot();
+
+    if (newText == "Altitude"){
+        y1 = qv_altidude;
+    }
+    else if (newText == "Pressao"){
+        y1 = qv_pressao;
+    }
+    else if (newText == "Temperatura"){
+        y1 = qv_temperatura;
+    }
+    else if (newText == "Aceleracao"){
+        y1 = qv_aceleracao;
+    }
+
+    fun_plot(x,y1,y2);
+}
+
+void MainWindow::on_combo_orange_currentTextChanged(const QString &newText)
+{
+    resetPlot();
+
+    if (newText == "Altitude"){
+        y2 = qv_altidude;
+    }
+    else if (newText == "Pressao"){
+        y2 = qv_pressao;
+    }
+    else if (newText == "Temperatura"){
+        y2 = qv_temperatura;
+    }
+    else if (newText == "Aceleracao"){
+        y2 = qv_aceleracao;
+    }
+
+    fun_plot(x,y1,y2);
+}
+
+void MainWindow::on_rd_idpackages_toggled(bool checked)
+{
+    resetPlot();
+
+    if (checked)
+    {
+        x=qv_id;
+    }
+
+    fun_plot(x,y1,y2);
+}
+
+void MainWindow::on_rd_seg_toggled(bool checked)
+{
+    resetPlot();
+
+    if (checked)
+    {
+        x=qv_temp;
+    }
+
+    fun_plot(x,y1,y2);
 }

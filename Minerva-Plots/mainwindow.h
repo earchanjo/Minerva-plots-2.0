@@ -38,6 +38,14 @@ private slots:
 
     void on_btn_open_file_clicked();
 
+    void on_combo_green_currentTextChanged(const QString &arg1);
+
+    void on_combo_orange_currentTextChanged(const QString &arg1);
+
+    void on_rd_idpackages_toggled(bool checked);
+
+    void on_rd_seg_toggled(bool checked);
+
 private:
     Ui::MainWindow *ui;
     QSerialPort *arduino;
